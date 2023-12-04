@@ -1,6 +1,6 @@
 <?php
 
-$inputArr = file("../input.txt");
+$inputArr = file("input.txt");
 
 $total_sum = 0;
 
