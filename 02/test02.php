@@ -11,6 +11,7 @@ foreach($file as $row)
 
 	$picks = explode(";", $row);
 	$include = true;
+	$mins = array("red" => null, "green" => null, "blue" => null);	
 	foreach($picks as $pick)
 	{
 		print PHP_EOL. $pick.PHP_EOL;
@@ -18,25 +19,15 @@ foreach($file as $row)
 		foreach($matches[2] as $key => $color)
 		{
 			print PHP_EOL. $gameid .": ". $color .": ". $matches[1][$key];
-	        	if(!isset($allowed_colors[$color]))
-	        	{
-		                print "not allowed game color: ". $color. PHP_EOL;
-	        	        break;
-		        }
-			if($matches[1][$key] > $allowed_colors[$color])
+			if(is_null($mins[$color]) || $mins[$color] < $matches[1][$key])
 			{
-				$include = false;
-				print " DISQ". PHP_EOL;
-				break 2;		
+				$mins[$color] = $matches[1][$key];
 			}
 		}
+		print_r($mins);
 
 	}
-	if($include)
-	{
-		$sum_of_games += $gameid;
-	}
-			
+	$sum_of_games += $mins["red"]*$mins["green"]*$mins["blue"];
 }
 
 print "Total: ". $sum_of_games. PHP_EOL;
