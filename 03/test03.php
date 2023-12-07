@@ -7,6 +7,8 @@ foreach($tmpfile as $row )
 }
 $total_sum = 0;
 $row_length = strlen($file[0]);
+$coordinates = array();
+$multipliers = array();
 
 foreach ($file as $rowno => $row)
 {
@@ -24,31 +26,31 @@ foreach ($file as $rowno => $row)
 		}
 		else
 		{
-			if(!is_null($start) && validate($rowno, $start, $pos-1))
+			if(!is_null($start) && validate($rowno, $start, $pos-1, $number))
 			{
 				print $number.PHP_EOL;
-				$total_sum += intval($number);
 			}
 			$number = "";
 			$start = null;
 		}
 	}
 	
-	if(!is_null($start) && validate($rowno, $start, $row_length-1))
+	if(!is_null($start) && validate($rowno, $start, $row_length-1, $number))
 	{
 		// last char
 		print $number.PHP_EOL;
-		$total_sum += intval($number);
 	}
 }
 
 print PHP_EOL. "Total: ". $total_sum . PHP_EOL;
+print "MULTIPLIERS:". PHP_EOL;
+print_r($multipliers);
 
 
-function validate($rowno, $start, $end)
+//look around for *
+function validate($rowno, $start, $end, $number)
 {
-	global $file, $row_length;
-	$test_str = "";
+	global $file, $row_length, $coordinates, $multipliers, $total_sum;
 	print "Number found at $rowno ($start, $end)". PHP_EOL;
 
 	for($j=$rowno-1; $j<=$rowno+1; $j++)
@@ -57,17 +59,28 @@ function validate($rowno, $start, $end)
 		{
 			if($i<0) $i=0;
 			if(isset($file[$j][$i]))
-				$test_str .= $file[$j][$i];
-			else
-				print "Out of bounds" . PHP_EOL;
+			{
+				if($file[$j][$i] == "*")
+				{
+					print "* found at $j : $i" . PHP_EOL;
+					if(empty($coordinates[$j][$i]))
+					{
+						$coordinates[$j][$i] = $number;
+					}
+					else
+					{
+						$multipliers[] = array($number, $coordinates[$j][$i]);
+						$total_sum += intval($number)*intval($coordinates[$j][$i]);
+						// we assume only 2 numbers to be attached to one wheel
+						unset($coordinates[$j][$i]);
+					}
+				}
+
+			}
 		}
 	}
 
-	print "Test: ". $test_str . PHP_EOL;
-	$bool =  preg_match("/[^0-9\.]/", $test_str);
-	if(!$bool)
-		print "Number skipped". PHP_EOL;
-	return $bool;
+	return false;
 }
 
 
